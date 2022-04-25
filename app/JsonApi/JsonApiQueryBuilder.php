@@ -37,7 +37,21 @@ class JsonApiQueryBuilder
                 $columns = ['*'],
                 $pagesName = 'page[number]',
                 $page = request('page.number',1)
-            )->appends(request()->only('sort','page.size'));
+            )->appends(request()->only('sort','filter','page.size'));
+        };
+    }
+
+    public function allowedFilters(): \Closure
+    {
+        return function($allowedFilters){
+            foreach (request('filter', []) as $filter => $value) {
+                abort_unless(in_array($filter, $allowedFilters), 400);
+                $this->hasNamedScope($filter)
+                    ? $this->{$filter}($value)
+                    : $this
+                    ->where($filter, 'LIKE', '%' . $value . '%');
+            }
+            return $this;
         };
     }
 }
