@@ -2,38 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Article;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ArticleResource;
 use App\Http\Requests\SaveArticleRequest;
 use App\Http\Resources\ArticleCollection;
-use App\Http\Resources\ArticleResource;
-use App\Models\Article;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Str;
+
 
 class ArticleController extends Controller
 {
-    public function index(Request $request): ArticleCollection
+    public function index(): ArticleCollection
     {
-        $articles = Article::query();
+        $articles = Article::allowedSorts(['title', 'content']);
 
-        if($request->filled('sort')){
-            $sortFields = explode(',',$request->input('sort'));
-
-            $allowedStorts = ['title','content'];
-
-            foreach ($sortFields as $sortField){
-                $sortDirection = Str::of($sortField)->startsWith('-')? 'desc' : 'asc';
-
-                $sortField = ltrim($sortField,'-');
-
-                abort_unless(in_array($sortField, $allowedStorts),400);
-                $articles->orderBy($sortField,$sortDirection);
-            }
-        }
-
-        return ArticleCollection::make($articles->get());
+        return ArticleCollection::make(
+            $articles->jsonPaginate()
+        );
     }
 
     public function show(Article $article): ArticleResource
