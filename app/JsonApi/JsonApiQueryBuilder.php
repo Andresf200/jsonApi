@@ -28,19 +28,6 @@ class JsonApiQueryBuilder
         };
     }
 
-    public function jsonPaginate(): \Closure
-    {
-       return function(){
-            return $this->paginate(
-            /** @var Builder $this**/
-                $perpage = request('page.size',15),
-                $columns = ['*'],
-                $pagesName = 'page[number]',
-                $page = request('page.number',1)
-            )->appends(request()->only('sort','filter','page.size'));
-        };
-    }
-
     public function allowedFilters(): \Closure
     {
         return function($allowedFilters){
@@ -52,6 +39,45 @@ class JsonApiQueryBuilder
                     ->where($filter, 'LIKE', '%' . $value . '%');
             }
             return $this;
+        };
+    }
+
+    public function sparseFieldset(): \Closure
+    {
+        return function() {
+            /** @var Builder $this */
+            if (request()->isNotFilled('fields')) {
+                return $this;
+            }
+
+            $resourceType = $this->model->getTable();
+            if(property_exists($this->model,'resourceType')){
+                $resourceType =$this->model->resourceType;
+            }
+
+            $fields = explode(',', request('fields.'.$resourceType));
+
+            $routeKeyName = $this->model->getRouteKeyName();
+            if(! in_array($routeKeyName, $fields)) {
+                $fields[] = 'slug';
+            }
+
+            return $this->addSelect($fields);
+        };
+    }
+
+
+
+    public function jsonPaginate(): \Closure
+    {
+       return function(){
+            return $this->paginate(
+            /** @var Builder $this**/
+                $perpage = request('page.size',15),
+                $columns = ['*'],
+                $pagesName = 'page[number]',
+                $page = request('page.number',1)
+            )->appends(request()->only('sort','filter','page.size'));
         };
     }
 }
