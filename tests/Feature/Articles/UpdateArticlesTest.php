@@ -15,30 +15,17 @@ class UpdateArticlesTest extends TestCase
     public function can_update_articles()
     {
         $article = Article::factory()->create();
-        $response = $this->patchJson(route('api.v1.articles.update',$article), [
+
+        $response = $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Update article',
             'slug' => $article->slug,
             'content' => 'Update Content'
         ])->assertOk();
 
-        $response->assertHeader(
-            'Location',
-            route('api.v1.articles.show', $article)
-        );
-
-        $response->assertExactJson([
-            'data' => [
-                'type' => 'articles',
-                'id' => (string)$article->getRouteKey(),
-                'attributes' => [
-                    'title' => 'Update article',
-                    'slug' => $article->slug,
-                    'content' => 'Update Content'
-                ],
-                'links' => [
-                    'self' => route('api.v1.articles.show', $article)
-                ]
-            ]
+        $response->assertJsonApiResource($article, [
+            'title' => 'Update article',
+            'slug' => $article->slug,
+            'content' => 'Update Content'
         ]);
     }
 
@@ -79,7 +66,7 @@ class UpdateArticlesTest extends TestCase
         $article1 = Article::factory()->create();
         $article2 = Article::factory()->create();
 
-        $this->patchJson(route('api.v1.articles.update',$article1), [
+        $this->patchJson(route('api.v1.articles.update', $article1), [
             'title' => 'Nuevo Articulo',
             'slug' => $article2->slug,
             'content' => 'Contenido del artículo'
@@ -90,7 +77,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_only_contain_letters_numbers_and_dashes()
     {
         $article = Article::factory()->create();
-        $this->patchJson(route('api.v1.articles.update',$article), [
+        $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => '%$!°!#%&/$%',
             'content' => 'Contenido del artículo'
@@ -101,11 +88,11 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_contain_underscores()
     {
         $article = Article::factory()->create();
-        $this->patchJson(route('api.v1.articles.update',$article), [
+        $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => 'with___underscores',
             'content' => 'Contenido del artículo'
-        ])->assertSee(trans('validation.no_underscores',[
+        ])->assertSee(trans('validation.no_underscores', [
             'attribute' => 'data.attributes.slug'
         ]))->assertJsonApiValidationErrors('slug');
     }
@@ -114,11 +101,11 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_start_with_dashes()
     {
         $article = Article::factory()->create();
-        $this->patchJson(route('api.v1.articles.update',$article), [
+        $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => '-starts-with-dashes',
             'content' => 'Contenido del artículo'
-        ])->assertSee(trans('validation.no_starting_dashes',[
+        ])->assertSee(trans('validation.no_starting_dashes', [
             'attribute' => 'data.attributes.slug'
         ]))->assertJsonApiValidationErrors('slug');
     }
@@ -127,11 +114,11 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_end_with_dashes()
     {
         $article = Article::factory()->create();
-        $this->patchJson(route('api.v1.articles.update',$article), [
+        $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => 'end-with-dashes-',
             'content' => 'Contenido del artículo'
-        ])->assertSee(trans('validation.no_ending_dashes',[
+        ])->assertSee(trans('validation.no_ending_dashes', [
             'attribute' => 'data.attributes.slug'
         ]))->assertJsonApiValidationErrors('slug');
     }

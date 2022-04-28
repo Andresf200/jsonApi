@@ -9,13 +9,14 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 class JsonApiTestResponse
 {
-    public function assertJsonApiValidationErrors()
+    /*Employee de implementacion de una extension con macros y mixis*/
+    public function assertJsonApiValidationErrors(): \Closure
     {
         return function ($attribute) {
             /** @var TestResponse $this */
 
             $pointer = Str::of($attribute)->startsWith('data')
-                ? "/".str_replace('.', '/', $attribute)
+                ? "/" . str_replace('.', '/', $attribute)
                 : "/data/attributes/{$attribute}";
 
             try {
@@ -25,7 +26,7 @@ class JsonApiTestResponse
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
                     "Failed to find a JSON:API validation error for key: '{$attribute}'"
-                    .PHP_EOL.PHP_EOL.
+                    . PHP_EOL . PHP_EOL .
                     $e->getMessage()
                 );
             }
@@ -39,7 +40,7 @@ class JsonApiTestResponse
             } catch (ExpectationFailedException $e) {
                 PHPUnit::fail(
                     "Failed to find a valid JSON:API error response"
-                    .PHP_EOL.PHP_EOL.
+                    . PHP_EOL . PHP_EOL .
                     $e->getMessage()
                 );
             }
@@ -47,6 +48,52 @@ class JsonApiTestResponse
             $this->assertHeader(
                 'content-type', 'application/vnd.api+json'
             )->assertStatus(422);
+        };
+    }
+
+    public function assertJsonApiResource(): \Closure
+    {
+        return function ($model, $attributes) {
+            /** @var TestResponse $this */
+            $this->assertExactJson([
+                    'data' => [
+                        'type' => $model->getResourceType(),
+                        'id' => (string)$model->getRouteKey(),
+                        'attributes' => $attributes,
+                        'links' => [
+                            'self' => route('api.v1.' . $model->getResourceType() . '.show', $model)
+                        ]
+                    ]
+                ]
+            )->assertHeader(
+                'Location',
+                route('api.v1.' . $model->getResourceType() . '.show', $model)
+            );
+        };
+    }
+
+    public function assertJsonApiResourceCollection(): \Closure
+    {
+        return function ($models, $attributesKeys) {
+            /** @var TestResponse $this */
+
+            $this->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'attributes' => $attributesKeys
+                    ]
+                ]
+            ]);
+
+            foreach ($models as $model) {
+                $this->assertJsonFragment([
+                    'type' => $model->getResourceType(),
+                    'id' => (string)$model->getRouteKey(),
+                    'links' => [
+                        'self' => route('api.v1.' . $model->getResourceType() . '.show', $model)
+                    ]
+                ]);
+            }
         };
     }
 }
