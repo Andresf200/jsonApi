@@ -2,50 +2,18 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\JsonResponse as JsonResponseAlias;
-use Illuminate\Http\Request;
+use App\JsonApi\Traits\JsonApiResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param Request $request
-     * @return array
-     */
-    public function toArray($request)
+    use JsonApiResource;
+    public function toJsonApi(): array
     {
         return [
-            'type' => 'articles',
-            'id' => (string)$this->resource->getRouteKey(),
-            'attributes' => array_filter([
-                'title' => $this->resource->title,
-                'slug' => $this->resource->slug,
-                'content' => $this->resource->content
-            ], function($value) {
-                if (request()->isNotFilled('fields')) {
-                    return true;
-                }
-
-                $fields = explode(',', request('fields.articles'));
-
-                if ($value === $this->getRouteKey()) {
-                    return in_array('slug', $fields);
-                }
-
-                return $value;
-            }),
-            'links' => [
-                'self' => url('/api/v1/articles/' . $this->resource->getRouteKey())
-            ]
+            'title' => $this->resource->title,
+            'slug' => $this->resource->slug,
+            'content' => $this->resource->content
         ];
-    }
-
-    public function toResponse($request)
-    {
-        return parent::toResponse($request)->withHeaders([
-            'location' => route('api.v1.articles.show',$this->resource)
-        ]);
     }
 }

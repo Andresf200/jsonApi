@@ -33,7 +33,7 @@ class CreateArticlesTest extends TestCase
                     'content' => 'Contenido del artículo'
                 ],
                 'links' => [
-                    'self' => route('api.v1.articles.show', $article)
+                     'self' => route('api.v1.articles.show', $article)
                 ]
             ]
         ]);
