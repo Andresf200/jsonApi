@@ -32,4 +32,17 @@ class Document extends Collection
         $this->items['data']['links'] = $links;
         return $this;
     }
+
+    public function relationships(array $relationships)
+    {
+        foreach ($relationships as $key  => $relationship){
+            $this->items['data']['relationships'][$key] = [
+                'data' => [
+                    'type' => $relationship->getResourceType(),
+                    'id' => $relationship->getRouteKey(),
+                ]
+            ];
+        }
+        return $this;
+    }
 }
