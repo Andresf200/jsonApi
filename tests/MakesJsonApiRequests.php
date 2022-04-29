@@ -2,10 +2,9 @@
 
 namespace Tests;
 
+use App\JsonApi\Document;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
-use PHPUnit\Framework\Assert as PHPUnit;
-use PHPUnit\Framework\ExpectationFailedException;
 
 trait MakesJsonApiRequests
 {
@@ -14,20 +13,17 @@ trait MakesJsonApiRequests
     /**
      * @param $uri
      * @param array $data
-     * @return array
      */
     public function getFormattedData($uri, array $data): array
     {
         $path = parse_url($uri)['path'];
         $type = (string) Str::of($path)->after('api/v1/')->before('/');
         $id = (string) Str::of($path)->after($type)->replace('/', '');
-        return [
-            'data' => array_filter([
-                'type' => $type,
-                'id' => $id,
-                'attributes' => $data
-            ])
-        ];
+
+        return Document::type($type)
+            ->id($id)
+            ->attributes($data)
+            ->toArray();
     }
 
     public function json($method, $uri, array $data = [], array $headers = []): TestResponse
