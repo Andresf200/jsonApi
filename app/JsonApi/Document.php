@@ -17,12 +17,15 @@ class Document extends Collection
 
     public function id($id): Document
     {
-        $this->items['data']['id'] = (string) $id;
+        if($id){
+            $this->items['data']['id'] = (string) $id;
+        }
         return $this;
     }
 
     public function attributes(array $attributes): Document
     {
+        unset($attributes['_relationships']);
         $this->items['data']['attributes'] = $attributes;
         return $this;
     }
@@ -33,7 +36,7 @@ class Document extends Collection
         return $this;
     }
 
-    public function relationships(array $relationships)
+    public function relationships(array $relationships): Document
     {
         foreach ($relationships as $key  => $relationship){
             $this->items['data']['relationships'][$key] = [
