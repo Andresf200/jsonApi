@@ -47,9 +47,9 @@ class IncludeCategoryTest extends TestCase
         ]);
 
         /*This function creates a listening method to see how many requests it has received.*/
-        DB::listen(function($query){
-            dump($query->sql);
-        });
+//        DB::listen(function($query){
+//            dump($query->sql);
+//        });
 
         $this->getJson($url)->assertJson([
             'data' => [],
@@ -70,4 +70,25 @@ class IncludeCategoryTest extends TestCase
             ]
         ]);
     }
+
+    /** @test */
+    public function cannot_include_unknown_relationships()
+    {
+        $article = Article::factory()->create();
+
+        //articles/the-slug?include=unknown
+        $url = route('api.v1.articles.show', [
+            'article' => $article,
+            'include' => 'unknown,unknown2'
+        ]);
+
+        $this->getJson($url)->assertStatus(400);
+
+        $url = route('api.v1.articles.index', [
+            'include' => 'unknown,unknown2'
+        ]);
+
+        $this->getJson($url)->assertStatus(400);
+    }
+
 }

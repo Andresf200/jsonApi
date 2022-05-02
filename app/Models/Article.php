@@ -54,4 +54,14 @@ class Article extends Model
     {
         $query->whereMonth('created_at',$month);
     }
+
+    /*Esto es parecido a un join*/
+    public function scopeCategories(Builder $query, $categories)
+    {
+        $categorySlugs = explode(',',$categories);
+        $query->whereHas('category',function($q) use ($categorySlugs){
+//            $q->where('slug',$categories); para buscar por un solo dato
+            $q->whereIn('slug',$categorySlugs);
+        });
+    }
 }

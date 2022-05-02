@@ -15,8 +15,8 @@ class ArticleController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $articles = Article::query()
-            ->with('category')
-            ->allowedFilters(['title', 'content', 'month', 'year'])
+            ->allowedIncludes(['category'])
+            ->allowedFilters(['title', 'content', 'month', 'year','categories'])
             ->allowedSorts(['title', 'content'])
             ->sparseFieldset()
             ->jsonPaginate();
@@ -28,7 +28,7 @@ class ArticleController extends Controller
     public function show($article): JsonResource
     {
         $article = Article::where('slug', $article)
-            ->with('category')
+            ->allowedIncludes(['category'])
             ->sparseFieldset()
             ->firstOrFail();
         return ArticleResource::make($article);
