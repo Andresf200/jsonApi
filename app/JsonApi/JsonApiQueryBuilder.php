@@ -52,6 +52,7 @@ class JsonApiQueryBuilder
             $includes = explode(',',request()->input('include'));
             foreach ($includes as $include){
                 abort_unless(in_array($include, $allowedIncludes),400);
+
                 $this->with($include);
             }
             return $this;
