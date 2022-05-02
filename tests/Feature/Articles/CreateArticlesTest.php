@@ -28,7 +28,7 @@ class CreateArticlesTest extends TestCase
             'Location',
             route('api.v1.articles.show', $article)
         );
-        $response->assertExactJson([
+        $response->assertJson([
             'data' => [
                 'type' => 'articles',
                 'id' => (string) $article->getRouteKey(),
