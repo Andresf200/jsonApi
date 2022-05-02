@@ -10,6 +10,13 @@ trait JsonApiResource
 {
     abstract public function toJsonApi():array; //sirve para obligar a aque se cree esta funcion los que utilizen el trait
 
+    public static function identifier($resource)
+    {
+        return Document::type($resource->getResourceType())
+            ->id($resource->getRouteKey())
+            ->toArray();
+    }
+
     public function toArray($request)
     {
         if($request->filled('include')){
