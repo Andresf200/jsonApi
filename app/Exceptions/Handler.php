@@ -47,17 +47,7 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->renderable(function (NotFoundHttpException $e) {
-            $id = request()->input('data.id');
-            $type = request()->input('data.type');
-            return response()->json([
-                'errors' => [
-                    [
-                        'title' => 'Not Found',
-                        'detail' => "No records found with the id '{$id}' in the '{$type}' resource.",
-                        'status' => '404'
-                    ]
-                ]
-            ], 404);
+            throw new JsonApi\NotFoundHttpException;
         });
     }
 
