@@ -4,6 +4,7 @@ namespace Tests\Feature\Articles;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -75,6 +76,27 @@ class CategoryRelationShipTest extends TestCase
         $this->assertDatabaseHas('articles',[
             'title' => $article->title,
             'category_id' => $category->id,
-            ]);
+        ]);
+    }
+    /** @test */
+    public function category_must_exists_in_database()
+    {
+        $article = Article::factory()->create();
+
+        $url = route('api.v1.articles.relationships.category',$article);
+
+        $this->withoutJsonApiDocumentFormatting();
+
+        $this->patchJson($url,[
+            'data' => [
+                'type' => 'categories',
+                'id' => 'non-existing',
+            ]
+        ])->assertJsonApiValidationErrors('data.id');
+
+        $this->assertDatabaseHas('articles',[
+            'title' => $article->title,
+            'category_id' => $article->category_id,
+        ]);
     }
 }

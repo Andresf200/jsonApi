@@ -79,4 +79,25 @@ class AuthorRelationShipTest extends TestCase
         ]);
     }
 
+    /** @test */
+    public function author_must_exists_in_database()
+    {
+        $article = Article::factory()->create();
+
+        $url = route('api.v1.articles.relationships.author',$article);
+
+        $this->withoutJsonApiDocumentFormatting();
+
+         $this->patchJson($url,[
+            'data' => [
+                'type' => 'authors',
+                'id' => 'non-existing',
+            ]
+        ])->assertJsonApiValidationErrors('data.id');
+
+        $this->assertDatabaseHas('articles',[
+            'title' => $article->title,
+            'user_id' => $article->user_id,
+        ]);
+    }
 }
