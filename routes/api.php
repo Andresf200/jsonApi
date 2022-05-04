@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\ArticleCategoryController;
 use App\Http\Controllers\Api\ArticleController;
 use App\Http\Controllers\Api\AuthorController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\LoginController;
+use App\Http\Middleware\ValidateJsonApiDocument;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -42,3 +44,6 @@ Route::get('articles/{article}/author',
     [ArticleAuthorController::class,'show'])
     ->name('articles.author');
 
+Route::withoutMiddleware(validateJsonApiDocument::class)
+    ->post('login',LoginController::class)
+    ->name('login');
