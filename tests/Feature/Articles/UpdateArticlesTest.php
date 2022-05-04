@@ -5,6 +5,7 @@ namespace Tests\Feature\Articles;
 use App\Models\Article;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class UpdateArticlesTest extends TestCase
@@ -12,9 +13,21 @@ class UpdateArticlesTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
+    public function guests_cannot_update_articles()
+    {
+        $article = Article::factory()->create();
+
+        $response = $this->patchJson(route('api.v1.articles.update', $article))
+            ->assertUnauthorized();
+
+//        $response->assertJsonApiError();
+    }
+
+    /** @test */
     public function can_update_articles()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
 
         $response = $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Update article',
@@ -33,6 +46,7 @@ class UpdateArticlesTest extends TestCase
     public function title_is_required()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'slug' => 'update-article',
             'content' => 'Article content'
@@ -43,6 +57,7 @@ class UpdateArticlesTest extends TestCase
     public function title_must_be_at_least_4_characters()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nue',
             'slug' => 'update-article',
@@ -54,6 +69,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_is_required()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Updated Article',
             'content' => 'Article content'
@@ -65,7 +81,7 @@ class UpdateArticlesTest extends TestCase
     {
         $article1 = Article::factory()->create();
         $article2 = Article::factory()->create();
-
+        Sanctum::actingAs($article1->author);
         $this->patchJson(route('api.v1.articles.update', $article1), [
             'title' => 'Nuevo Articulo',
             'slug' => $article2->slug,
@@ -77,6 +93,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_only_contain_letters_numbers_and_dashes()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => '%$!°!#%&/$%',
@@ -88,6 +105,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_contain_underscores()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => 'with___underscores',
@@ -101,6 +119,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_start_with_dashes()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => '-starts-with-dashes',
@@ -114,6 +133,7 @@ class UpdateArticlesTest extends TestCase
     public function slug_must_not_end_with_dashes()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Nuevo Articulo',
             'slug' => 'end-with-dashes-',
@@ -127,6 +147,7 @@ class UpdateArticlesTest extends TestCase
     public function content_is_required()
     {
         $article = Article::factory()->create();
+        Sanctum::actingAs($article->author);
         $this->patchJson(route('api.v1.articles.update', $article), [
             'title' => 'Updated Article',
             'slug' => 'update-article'
